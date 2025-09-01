@@ -1,61 +1,72 @@
--- P1 Q4
+-- Verifying current customers
 SELECT *
 FROM customer_nnh;
 
+-- Adding a new customer
 INSERT INTO customer_nnh (CustID, CustFName, CustLName, Phone, SalesRepID) VALUES ('T104', 'Wes', 'Thomas', '469-555-1215', 22);
 
--- P1 Q5
+-- Verifying current products
 SELECT *
 FROM product_nnh;
 
+-- Adding a new product with price
 INSERT INTO product_nnh (ProdID, ProdName, ProdCatID, ProdPrice) VALUES (246, 'Milwaukee Power Drill', 2, 179.00);
 
--- P1 Q6
+-- Check current orders
 SELECT *
 FROM order_nnh;
 
+-- Get the next available orderID
 SELECT MAX(OrderID) + 1 AS 'New OrderID'
 FROM order_nnh;
 
+-- Create new order
 INSERT INTO order_nnh (OrderID, OrderDate, CustID) VALUES (110, '2022-01-28', 'T104');
 
+-- Review order details 
 SELECT *
 FROM orderdetail_nnh;
 
+-- Add three order lines to Order 110
 INSERT INTO orderdetail_nnh (OrderID, ProdID, ProdQty, ProdPrice) VALUES (110, 618, 1, (SELECT ProdPrice FROM product_nnh WHERE ProdID = 618));
 INSERT INTO orderdetail_nnh (OrderID, ProdID, ProdQty, ProdPrice) VALUES (110, 407, 2, (SELECT ProdPrice FROM product_nnh WHERE ProdID = 407));
 INSERT INTO orderdetail_nnh (OrderID, ProdID, ProdQty, ProdPrice) VALUES (110, 124, 1, (SELECT ProdPrice FROM product_nnh WHERE ProdID = 124));
 
--- P1 Q7
+-- Check current orders
 SELECT *
 FROM order_nnh;
 
+-- Get next available orderID
 SELECT MAX(OrderID) + 1 AS 'New OrderID'
 FROM order_nnh;
 
+-- Create new order for customer
 INSERT INTO order_nnh (OrderID, OrderDate, CustID) VALUES (111, '2022-01-29', 'S100');
 
+-- Review order details
 SELECT *
 FROM orderdetail_nnh;
 
+-- Add 3 order lines to Order 111
 INSERT INTO orderdetail_nnh (OrderID, ProdID, ProdQty, ProdPrice) VALUES (111, 535, 3, (SELECT ProdPrice FROM product_nnh WHERE ProdID = 535));
 INSERT INTO orderdetail_nnh (OrderID, ProdID, ProdQty, ProdPrice) VALUES (111, 246, 1, (SELECT ProdPrice FROM product_nnh WHERE ProdID = 246));
 INSERT INTO orderdetail_nnh (OrderID, ProdID, ProdQty, ProdPrice) VALUES (111, 610, 1, (SELECT ProdPrice FROM product_nnh WHERE ProdID = 610));
 
--- P1 Q8
+-- Verifying customers before updating
 SELECT *
 FROM customer_nnh;
 
+-- Update phone number for customer
 UPDATE customer_nnh
 SET Phone = '817-555-8918'
 WHERE CustID = 'B200';
 
 COMMIT;
 
--- P2 Q1
 SELECT *
 FROM comm_nnh;
 
+-- Show each sales rep's name/ID, their commission class, and the rate
 SELECT 
 	CONCAT(s.SalesRepFName, ' ', s.SalesRepLName) AS 'SalesRep Name',
 	s.SalesRepID AS 'Sales Rep ID',
@@ -65,7 +76,7 @@ FROM salesrep_nnh s
 JOIN comm_nnh c ON s.CommClass = c.CommClass
 ORDER BY s.SalesRepLName ASC;
 
--- P2 Q2
+-- List all order lines with formatted price
 SELECT 
 	OrderID AS 'Order ID',
 	ProdID AS 'Product ID',
@@ -74,7 +85,9 @@ SELECT
 FROM orderdetail_nnh
 ORDER BY OrderID, ProdID ASC;
 
--- P2 Q3
+
+-- Customers with their sales rep
+-- Formatting phone
 SELECT
 	c.CustID AS 'CustID',
     c.CustFName AS 'CustFirstName',
@@ -87,7 +100,8 @@ FROM customer_nnh c
 JOIN salesrep_nnh s ON c.SalesRepID = s.SalesRepID
 ORDER BY c.CustID ASC;
 
--- P2 Q4
+-- Highest commission rate per department
+-- CTE finds max commission rate per Dept, then returns reps who match the max
 WITH high_sales AS 
 (
 	SELECT
@@ -112,7 +126,7 @@ JOIN dept_nnh d ON d.DeptID = s.DeptID
 JOIN high_sales hs ON s.DeptID = hs.DeptID AND c.CommRate = hs.MaxRate
 ORDER BY d.DeptID ASC;
 
--- P2 Q5
+-- Most expensive product on order 100
 SELECT
 	p.ProdID AS 'Product_ID',
     p.ProdName AS 'Product_Name',
@@ -128,7 +142,7 @@ WHERE p.ProdPrice = (
     WHERE o2.OrderID = 100
 );
 
--- P2 Q6
+-- Sales rep count per department
 SELECT 
 	d.DeptName AS 'Dept_Name',
     COUNT(s.SalesRepID) AS 'Sales_Rep_Count'
@@ -137,7 +151,7 @@ JOIN salesrep_nnh s ON s.DeptID = d.DeptID
 GROUP BY d.DeptName
 ORDER BY Sales_Rep_Count;
     
--- P2 Q7
+-- Sales rep with commission rate >=5% 
 SELECT
 	s.SalesRepID AS 'Sales_Rep_ID',
     s.SalesRepFName AS 'First_Name',
@@ -148,7 +162,8 @@ JOIN comm_nnh c ON c.commclass = s.commclass
 WHERE c.CommRate >= .05
 ORDER BY c.CommRate DESC;
 
--- P2 Q8
+-- Orders with customer & sales rep names
+-- Date formatting
 SELECT
 	o.OrderID AS 'Order ID',
     DATE_FORMAT(o.OrderDate, '%m/%d/%y') AS 'Order Date',
@@ -163,7 +178,7 @@ SELECT
     JOIN salesrep_nnh s ON s.SalesRepID = c.SalesRepID
     ORDER BY o.OrderID;
 
--- P2 Q9
+-- Detail for order 104, with extended price
 SELECT
 	od.OrderID AS 'OrderID',
     od.ProdID AS 'ProdID',
@@ -175,7 +190,7 @@ SELECT
     JOIN product_nnh p ON p.ProdID = od.ProdID
     WHERE od.OrderID = 104;
     
--- P2 Q10
+-- Dept headcount and average commission rate 
 SELECT
 	d.DeptID AS 'DeptID',
     d.DeptName AS 'DeptName',
@@ -187,7 +202,7 @@ SELECT
     GROUP BY d.DeptID
     ORDER BY AvgCommRate;
     
-    -- P2 Q11
+    -- Sales rep with dept and commission info
     SELECT
 		s.SalesRepID AS 'SalesRepID',
         s.SalesRepFName AS 'SalesRepFName',
@@ -200,7 +215,7 @@ SELECT
     JOIN comm_nnh c ON c.CommClass = s.CommClass
     ORDER BY s.SalesRepID;
     
-    -- P2 Q 12
+    -- Sales reps in commission class 'A'
     SELECT
 		s.SalesRepID AS 'SalesRepID',
         CONCAT(s.SalesRepFName, ' ' ,s.SalesRepLName) AS 'SalesRep_Name',
@@ -212,7 +227,7 @@ SELECT
         WHERE c.CommClass = 'A'
         ORDER BY d.DeptID, s.SalesRepID;
         
-	-- P2 Q13
+	-- Customers with no orders 
 	SELECT
 		c.CustID AS 'CustID',
         c.CustFName AS 'CustFName',
